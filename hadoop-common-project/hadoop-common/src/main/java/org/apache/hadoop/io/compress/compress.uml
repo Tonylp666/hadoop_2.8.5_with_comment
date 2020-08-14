@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.apache.hadoop.io.compress</OriginalElement>
+  <nodes>
+    <node x="458.0" y="907.0">org.apache.hadoop.io.compress.TestCodecPool</node>
+    <node x="268.2" y="206.0">org.apache.hadoop.io.compress.SnappyCodec</node>
+    <node x="825.0" y="608.0">org.apache.hadoop.io.compress.TestBlockDecompressorStream</node>
+    <node x="104.0" y="304.0">org.apache.hadoop.io.compress.CompressionOutputStream</node>
+    <node x="0.0" y="711.0">org.apache.hadoop.io.compress.FakeDecompressor</node>
+    <node x="0.0" y="510.0">org.apache.hadoop.io.compress.TestCompressorStream</node>
+    <node x="0.0" y="1005.0">org.apache.hadoop.io.compress.DoNotPool</node>
+    <node x="298.0833333333333" y="0.0">org.apache.hadoop.io.compress.CompressionCodec</node>
+    <node x="500.0" y="608.0">org.apache.hadoop.io.compress.Compressor</node>
+    <node x="237.0" y="907.0">org.apache.hadoop.io.compress.TestCodecFactory</node>
+    <node x="456.0" y="711.0">org.apache.hadoop.io.compress.snappy</node>
+    <node x="196.0" y="711.0">org.apache.hadoop.io.compress.CompressDecompressTester</node>
+    <node x="602.0" y="809.0">org.apache.hadoop.io.compress.CompressionCodecFactory</node>
+    <node x="0.0" y="907.0">org.apache.hadoop.io.compress.DirectDecompressor</node>
+    <node x="0.0" y="809.0">org.apache.hadoop.io.compress.TestCompressorDecompressor</node>
+    <node x="301.0" y="809.0">org.apache.hadoop.io.compress.TestCompressionStreamReuse</node>
+    <node x="655.0" y="907.0">org.apache.hadoop.io.compress.bzip2</node>
+    <node x="228.0" y="510.0">org.apache.hadoop.io.compress.BlockCompressorStream</node>
+    <node x="699.5" y="0.0">org.apache.hadoop.io.compress.CompressionInputStream</node>
+    <node x="620.0" y="711.0">org.apache.hadoop.io.compress.FakeCompressor</node>
+    <node x="132.0" y="407.0">org.apache.hadoop.io.compress.CompressorStream</node>
+    <node x="165.0" y="1005.0">org.apache.hadoop.io.compress.TestCodec</node>
+    <node x="571.5" y="206.0">org.apache.hadoop.io.compress.BlockDecompressorStream</node>
+    <node x="0.0" y="103.0">org.apache.hadoop.io.compress.DirectDecompressionCodec</node>
+    <node x="184.0" y="608.0">org.apache.hadoop.io.compress.Decompressor</node>
+    <node x="591.5" y="103.0">org.apache.hadoop.io.compress.DecompressorStream</node>
+    <node x="260.0" y="103.0">org.apache.hadoop.io.compress.SplittableCompressionCodec</node>
+    <node x="803.5" y="103.0">org.apache.hadoop.io.compress.SplitCompressionInputStream</node>
+    <node x="879.0" y="809.0">org.apache.hadoop.io.compress.TestDecompressorStream</node>
+    <node x="836.0" y="907.0">org.apache.hadoop.io.compress.zlib</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.apache.hadoop.io.compress.DirectDecompressionCodec" target="org.apache.hadoop.io.compress.CompressionCodec">
+      <point x="0.0" y="-26.5" />
+      <point x="120.0" y="78.0" />
+      <point x="327.41666666666663" y="78.0" />
+      <point x="-58.666666666666686" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.FakeDecompressor" target="org.apache.hadoop.io.compress.Decompressor">
+      <point x="0.0" y="-26.5" />
+      <point x="88.0" y="691.0" />
+      <point x="208.0" y="691.0" />
+      <point x="-48.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.snappy" target="org.apache.hadoop.io.compress.Decompressor">
+      <point x="-36.0" y="-26.5" />
+      <point x="492.0" y="681.0" />
+      <point x="304.0" y="681.0" />
+      <point x="48.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.SplittableCompressionCodec" target="org.apache.hadoop.io.compress.CompressionCodec">
+      <point x="0.0" y="-26.5" />
+      <point x="388.0" y="78.0" />
+      <point x="386.0833333333333" y="78.0" />
+      <point x="0.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.SnappyCodec" target="org.apache.hadoop.io.compress.DirectDecompressionCodec">
+      <point x="-34.0" y="-26.5" />
+      <point x="302.2" y="181.0" />
+      <point x="120.0" y="181.0" />
+      <point x="0.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.FakeCompressor" target="org.apache.hadoop.io.compress.Compressor">
+      <point x="0.0" y="-26.5" />
+      <point x="700.0" y="691.0" />
+      <point x="606.6666666666666" y="691.0" />
+      <point x="42.66666666666663" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.BlockDecompressorStream" target="org.apache.hadoop.io.compress.DecompressorStream">
+      <point x="0.0" y="-26.5" />
+      <point x="0.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.TestCompressorStream" target="org.apache.hadoop.io.compress.CompressorStream">
+      <point x="0.0" y="-26.5" />
+      <point x="104.0" y="485.0" />
+      <point x="176.0" y="485.0" />
+      <point x="-44.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.SnappyCodec" target="org.apache.hadoop.io.compress.CompressionCodec">
+      <point x="34.0" y="-26.5" />
+      <point x="370.2" y="181.0" />
+      <point x="526.5" y="181.0" />
+      <point x="526.5" y="78.0" />
+      <point x="444.75" y="78.0" />
+      <point x="58.666666666666686" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.CompressorStream" target="org.apache.hadoop.io.compress.CompressionOutputStream">
+      <point x="0.0" y="-26.5" />
+      <point x="0.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.SplitCompressionInputStream" target="org.apache.hadoop.io.compress.CompressionInputStream">
+      <point x="0.0" y="-26.5" />
+      <point x="935.5" y="78.0" />
+      <point x="867.5" y="78.0" />
+      <point x="56.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.CompressDecompressTester" target="org.apache.hadoop.io.compress.Compressor">
+      <point x="60.0" y="-26.5" />
+      <point x="376.0" y="691.0" />
+      <point x="521.3333333333334" y="691.0" />
+      <point x="-42.66666666666663" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.DecompressorStream" target="org.apache.hadoop.io.compress.CompressionInputStream">
+      <point x="0.0" y="-26.5" />
+      <point x="687.5" y="78.0" />
+      <point x="755.5" y="78.0" />
+      <point x="-56.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.CompressDecompressTester" target="org.apache.hadoop.io.compress.Decompressor">
+      <point x="-60.0" y="-26.5" />
+      <point x="0.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.BlockCompressorStream" target="org.apache.hadoop.io.compress.CompressorStream">
+      <point x="0.0" y="-26.5" />
+      <point x="336.0" y="485.0" />
+      <point x="264.0" y="485.0" />
+      <point x="44.0" y="26.5" />
+    </edge>
+    <edge source="org.apache.hadoop.io.compress.snappy" target="org.apache.hadoop.io.compress.Compressor">
+      <point x="36.0" y="-26.5" />
+      <point x="0.0" y="26.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.7940630797773655" x="551.5" y="529.0" />
+  <SelectedNodes>
+    <node>org.apache.hadoop.io.compress.TestCodecPool</node>
+  </SelectedNodes>
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
