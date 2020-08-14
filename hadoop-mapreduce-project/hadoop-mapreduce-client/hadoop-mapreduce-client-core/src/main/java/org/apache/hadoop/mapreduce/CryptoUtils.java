@@ -39,6 +39,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.LimitInputStream;
 
 /**
+ * liping   这个是关于加密的流处理工具，特别用于在map spill 出的文件。
  * This class provides utilities to make it easier to work with Cryptographic
  * Streams. Specifically for dealing with encrypting intermediate data such
  * MapReduce spill files.

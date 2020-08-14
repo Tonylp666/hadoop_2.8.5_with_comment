@@ -309,10 +309,13 @@ class Fetcher<K,V> extends Thread {
       LOG.debug("Fetcher " + id + " going to fetch from " + host + " for: "
         + maps);
     }
+    //liping : 也就是说,后面的Shuffle阶段就会从这些map task运行所在的节点上进行fetch data的操作.
+    // 在拷贝操作之前,维护一个remaining剩余变量操作
     
     // List of maps to be fetched yet
     Set<TaskAttemptID> remaining = new HashSet<TaskAttemptID>(maps);
-    
+
+    //liping  首先，根据变量获取输入流数据，判断是否存在map task的host上真正存在数据
     // Construct the url and connect
     URL url = getMapOutputURL(host, maps);
     DataInputStream input = null;
@@ -322,7 +325,7 @@ class Fetcher<K,V> extends Thread {
       if (input == null) {
         return;
       }
-
+      //liping  继续循环拷贝读取
       // Loop through available map-outputs and fetch them
       // On any error, faildTasks is not null and we exit
       // after putting back the remaining maps to the 
@@ -461,7 +464,8 @@ class Fetcher<K,V> extends Thread {
   }
   
   private static TaskAttemptID[] EMPTY_ATTEMPT_ID_ARRAY = new TaskAttemptID[0];
-  
+
+
   private TaskAttemptID[] copyMapOutput(MapHost host,
                                 DataInputStream input,
                                 Set<TaskAttemptID> remaining,

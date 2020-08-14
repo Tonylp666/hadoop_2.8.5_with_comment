@@ -60,6 +60,7 @@ public class Shuffle<K, V> implements ShuffleConsumerPlugin<K, V>, ExceptionRepo
   private Task reduceTask; //Used for status updates
   private Map<TaskAttemptID, MapOutputFile> localMapFiles;
 
+  //liping  在这个方法里面，我们可以在最后看到，会有merge的操作。即在shuffle阶段尾声的时候，会进行merge
   @Override
   public void init(ShuffleConsumerPlugin.Context context) {
     this.context = context;
@@ -101,6 +102,7 @@ public class Shuffle<K, V> implements ShuffleConsumerPlugin<K, V>, ExceptionRepo
     int maxEventsToFetch = Math.min(MAX_EVENTS_TO_FETCH, eventsPerReducer);
 
     // Start the map-completion events fetcher thread
+    //liping  抓取map输出
     final EventFetcher<K,V> eventFetcher = 
       new EventFetcher<K,V>(reduceId, umbilical, scheduler, this,
           maxEventsToFetch);
@@ -110,6 +112,8 @@ public class Shuffle<K, V> implements ShuffleConsumerPlugin<K, V>, ExceptionRepo
     boolean isLocal = localMapFiles != null;
     final int numFetchers = isLocal ? 1 :
       jobConf.getInt(MRJobConfig.SHUFFLE_PARALLEL_COPIES, 5);
+    //liping: Fetcher<K,V>[] 多线程拷贝，加快拷贝速度。如果map输出结果是本地的，则指挥调用一个Fetcher线程，调用LocalFetcher<K, V>() 来做。
+    // 如果map段输出不在本地，则会调用多线程来抓取数据。
     Fetcher<K,V>[] fetchers = new Fetcher[numFetchers];
     if (isLocal) {
       fetchers[0] = new LocalFetcher<K, V>(jobConf, reduceId, scheduler,

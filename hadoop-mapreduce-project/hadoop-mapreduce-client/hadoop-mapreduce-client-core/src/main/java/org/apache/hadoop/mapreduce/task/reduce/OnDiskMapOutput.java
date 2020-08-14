@@ -91,6 +91,13 @@ class OnDiskMapOutput<K, V> extends IFileWrappedMapOutput<K, V> {
     return outPath.suffix(String.valueOf(fetcher));
   }
 
+  /**
+   *  liping:执行shuffle，拷贝数据到disk
+   *        bufferSize:64k
+   *
+   *
+   *
+   */
   @Override
   protected void doShuffle(MapHost host, IFileInputStream input,
                       long compressedLength, long decompressedLength,

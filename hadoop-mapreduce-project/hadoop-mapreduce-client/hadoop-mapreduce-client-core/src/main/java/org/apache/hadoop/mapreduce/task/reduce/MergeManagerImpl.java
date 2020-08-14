@@ -258,6 +258,12 @@ public class MergeManagerImpl<K, V> implements MergeManager<K, V> {
     inMemoryMerger.waitForMerge();
   }
 
+  /**
+   * 本方法返回只有两种：
+   *                拷贝到内存中的InMemoryMapOutput
+   *                拷贝到磁盘上的OnDiskMapOutput
+   *  当目标确定后，开始远程拷贝
+   */
   @Override
   public synchronized MapOutput<K,V> reserve(TaskAttemptID mapId, 
                                              long requestedSize,

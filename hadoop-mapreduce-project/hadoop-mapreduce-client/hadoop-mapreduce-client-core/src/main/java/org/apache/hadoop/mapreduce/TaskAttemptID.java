@@ -26,6 +26,9 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 
 /**
+ * liping TaskAttemptID表示一个任务尝试的不可变的唯一标识符。
+ * 每个任务尝试都是由其TaskID标识的Map或Reduce任务的一个特定实例。
+ *
  * TaskAttemptID represents the immutable and unique identifier for 
  * a task attempt. Each task attempt is one particular instance of a Map or
  * Reduce Task identified by its TaskID. 

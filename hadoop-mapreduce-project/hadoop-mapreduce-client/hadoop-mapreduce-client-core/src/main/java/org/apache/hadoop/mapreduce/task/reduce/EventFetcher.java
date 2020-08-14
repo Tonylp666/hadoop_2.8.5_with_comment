@@ -109,7 +109,7 @@ class EventFetcher<K,V> extends Thread {
    * Queries the {@link TaskTracker} for a set of map-completion events 
    * from a given event ID.
    * @throws IOException
-   */  
+   */
   protected int getMapCompletionEvents()
       throws IOException, InterruptedException {
     
@@ -117,6 +117,9 @@ class EventFetcher<K,V> extends Thread {
     TaskCompletionEvent events[] = null;
 
     do {
+      // liping: 由reduce任务调用，以获取完成映射的映射输出位置。
+      //         返回以映射-任务-完成-事件为中心的更新。
+      //         更新还附带了任务跟踪器上复制的事件是否已更改的信息。这将触发子进程上的一些操作。
       MapTaskCompletionEventsUpdate update =
           umbilical.getMapCompletionEvents(
               (org.apache.hadoop.mapred.JobID)reduce.getJobID(),

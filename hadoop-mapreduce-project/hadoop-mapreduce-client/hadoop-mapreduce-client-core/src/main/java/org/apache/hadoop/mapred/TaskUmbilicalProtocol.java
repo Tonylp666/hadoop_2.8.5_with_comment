@@ -147,7 +147,12 @@ public interface TaskUmbilicalProtocol extends VersionedProtocol {
   /** Report that the task encounted a fatal error.*/
   void fatalError(TaskAttemptID taskId, String message) throws IOException;
   
-  /** Called by a reduce task to get the map output locations for finished maps.
+  /**
+   * 由reduce任务调用，以获取完成映射的映射输出位置。
+   * 返回以映射-任务-完成-事件为中心的更新。
+   * 更新还附带了任务跟踪器上复制的事件是否已更改的信息。这将触发子进程上的一些操作。
+   *
+   * Called by a reduce task to get the map output locations for finished maps.
    * Returns an update centered around the map-task-completion-events. 
    * The update also piggybacks the information whether the events copy at the 
    * task-tracker has changed or not. This will trigger some action at the 
