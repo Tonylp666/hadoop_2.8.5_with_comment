@@ -152,6 +152,7 @@ public class IFile {
       // Write EOF_MARKER for key/value length
       WritableUtils.writeVInt(out, EOF_MARKER);
       WritableUtils.writeVInt(out, EOF_MARKER);
+      //liping  decompressedBytesWritten - 2，因为上面在输出时最后写了两个-1。
       decompressedBytesWritten += 2 * WritableUtils.getVIntSize(EOF_MARKER);
       
       //Flush the stream
@@ -217,8 +218,8 @@ public class IFile {
 
       // Reset
       buffer.reset();
-      
-      // Update bytes written
+
+      // Update bytes written 这个东西表示的是写出的原文大小。。。。。。。。。。。。
       decompressedBytesWritten += keyLength + valueLength + 
                                   WritableUtils.getVIntSize(keyLength) + 
                                   WritableUtils.getVIntSize(valueLength);
@@ -245,7 +246,7 @@ public class IFile {
       out.write(key.getData(), key.getPosition(), keyLength); 
       out.write(value.getData(), value.getPosition(), valueLength); 
 
-      // Update bytes written
+      // Update bytes written 这个东西表示的是写出的原文大小。。。。。。。。。。。。
       decompressedBytesWritten += keyLength + valueLength + 
                       WritableUtils.getVIntSize(keyLength) + 
                       WritableUtils.getVIntSize(valueLength);
@@ -385,7 +386,8 @@ public class IFile {
       }
       return len;
     }
-    
+
+    //liping  ``<key-len,value-len,key,value>`` 判断下一条记录是否存在
     protected boolean positionToNextRecord(DataInput dIn) throws IOException {
       // Sanity check
       if (eof) {
@@ -416,7 +418,8 @@ public class IFile {
             
       return true;
     }
-    
+
+    //liping  首先判断是否有下一条记录，如果存在下一条记录的时候 read()数据，并将本次读取的数据大小更新到 bytesRead
     public boolean nextRawKey(DataInputBuffer key) throws IOException {
       if (!positionToNextRecord(dataIn)) {
         return false;
@@ -432,8 +435,10 @@ public class IFile {
       bytesRead += currentKeyLength;
       return true;
     }
-    
+
+    //liping  获取下一条记录的 value
     public void nextRawValue(DataInputBuffer value) throws IOException {
+      //liping  valBytes ： value.getData().length 、 currentValueLength 中较大者
       final byte[] valBytes = (value.getData().length < currentValueLength)
         ? new byte[currentValueLength << 1]
         : value.getData();
@@ -441,6 +446,7 @@ public class IFile {
       if (i != currentValueLength) {
         throw new IOException ("Asked for " + currentValueLength + " Got: " + i);
       }
+      //liping  截取 valBytes 中 currentValueLength 长度的数据
       value.reset(valBytes, currentValueLength);
       
       // Record the bytes read

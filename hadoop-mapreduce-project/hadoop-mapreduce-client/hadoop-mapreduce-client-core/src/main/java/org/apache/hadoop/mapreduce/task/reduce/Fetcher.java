@@ -319,7 +319,11 @@ class Fetcher<K,V> extends Thread {
     // Construct the url and connect
     URL url = getMapOutputURL(host, maps);
     DataInputStream input = null;
-    
+    /**
+     *liping  通过HttpURLConnection的形式获取map的输出
+     *        第一步：将数据加载到内存
+     *        第二步：通过copyMapOutput()
+     */
     try {
       input = openShuffleUrl(host, remaining, url);
       if (input == null) {
@@ -340,6 +344,7 @@ class Fetcher<K,V> extends Thread {
           // Setup connection again if disconnected by NM
           connection.disconnect();
           // Get map output from remaining tasks only.
+          //url = host+mapId
           url = getMapOutputURL(host, remaining);
           input = openShuffleUrl(host, remaining, url);
           if (input == null) {
@@ -347,7 +352,8 @@ class Fetcher<K,V> extends Thread {
           }
         }
       }
-      
+
+      //将失败的任务加入到失败map容器中
       if(failedTasks != null && failedTasks.length > 0) {
         LOG.warn("copyMapOutput failed for tasks "+Arrays.toString(failedTasks));
         scheduler.hostFailed(host.getHostName());
@@ -357,6 +363,7 @@ class Fetcher<K,V> extends Thread {
       }
 
       // Sanity check
+      // liping   这种情况应该是 remaining 中的任务没有执行完
       if (failedTasks == null && !remaining.isEmpty()) {
         throw new IOException("server didn't return all expected map outputs: "
             + remaining.size() + " left.");
@@ -466,6 +473,13 @@ class Fetcher<K,V> extends Thread {
   private static TaskAttemptID[] EMPTY_ATTEMPT_ID_ARRAY = new TaskAttemptID[0];
 
 
+  /**
+   *  每次读取一个mapid,根据MergeManagerImpl中的reserve函数，检查map的输出是否超过了mapreduce.reduce.memory.totalbytes配置的大小，
+   *  此配置的默认值是当前Runtime的maxMemory*mapreduce.reduce.shuffle.input.buffer.percent配置的值，Buffer.percent的默认值为0.90。
+   * 如果mapoutput超过了此配置的大小时,生成一个OnDiskMapOutput实例。在接下来的操作中，map的输出写入到local临时文件中。
+   * 如果没有超过此大小，生成一个InMemoryMapOutput实例。在接下来操作中，直接把map输出写入到内存。
+   * 最后，执行ShuffleScheduler.copySucceeded完成文件的copy,调用mapout.commit函数，更新状态或者触发merge操作。
+   */
   private TaskAttemptID[] copyMapOutput(MapHost host,
                                 DataInputStream input,
                                 Set<TaskAttemptID> remaining,
@@ -480,7 +494,9 @@ class Fetcher<K,V> extends Thread {
       int forReduce = -1;
       //Read the shuffle header
       try {
+        /*    <mapId,compressedLength,uncompressedLength,forReduce>     */
         ShuffleHeader header = new ShuffleHeader();
+        //header.readFields(input)  这个方法是从DataInput 数据流中读取  <mapId,compressedLength,uncompressedLength,forReduce>  。
         header.readFields(input);
         mapId = TaskAttemptID.forName(header.mapId);
         compressedLength = header.compressedLength;
@@ -494,6 +510,7 @@ class Fetcher<K,V> extends Thread {
       }
 
       InputStream is = input;
+      //liping  将输入流包装加密
       is = CryptoUtils.wrapIfNecessary(jobConf, is, compressedLength);
       compressedLength -= CryptoUtils.cryptoPadding(jobConf);
       decompressedLength -= CryptoUtils.cryptoPadding(jobConf);
@@ -534,6 +551,13 @@ class Fetcher<K,V> extends Thread {
         LOG.info("fetcher#" + id + " about to shuffle output of map "
             + mapOutput.getMapId() + " decomp: " + decompressedLength
             + " len: " + compressedLength + " to " + mapOutput.getDescription());
+        /**
+         * liping: 这里开始执行shuffle。
+         *  org.apache.hadoop.mapreduce.task.reduce.InMemoryMapOutput#doShuffle
+         *  org.apache.hadoop.mapreduce.task.reduce.OnDiskMapOutput#doShuffle
+         * 作用：执行shuffle，拷贝map输出数据到disk/memory。
+         * bufferSize:64kb。
+         */
         mapOutput.shuffle(host, is, compressedLength, decompressedLength,
             metrics, reporter);
       } catch (java.lang.InternalError | Exception e) {
@@ -545,10 +569,10 @@ class Fetcher<K,V> extends Thread {
       long endTime = Time.monotonicNow();
       // Reset retryStartTime as map task make progress if retried before.
       retryStartTime = 0;
-      
+      //liping  完成copy，将执行成功的任务从failtask 列表中移除
       scheduler.copySucceeded(mapId, host, compressedLength, 
                               startTime, endTime, mapOutput);
-      // Note successful shuffle
+      // Note successful shuffle，将执行成功的 shuffle 从 remaining 移除
       remaining.remove(mapId);
       metrics.successFetch();
       return null;

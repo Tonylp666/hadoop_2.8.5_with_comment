@@ -94,9 +94,6 @@ class OnDiskMapOutput<K, V> extends IFileWrappedMapOutput<K, V> {
   /**
    *  liping:执行shuffle，拷贝数据到disk
    *        bufferSize:64k
-   *
-   *
-   *
    */
   @Override
   protected void doShuffle(MapHost host, IFileInputStream input,
@@ -143,6 +140,7 @@ class OnDiskMapOutput<K, V> extends IFileWrappedMapOutput<K, V> {
     }
     this.compressedSize = compressedLength;
   }
+
 
   @Override
   public void commit() throws IOException {

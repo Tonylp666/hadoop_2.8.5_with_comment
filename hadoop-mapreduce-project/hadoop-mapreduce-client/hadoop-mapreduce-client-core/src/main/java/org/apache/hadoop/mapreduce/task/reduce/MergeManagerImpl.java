@@ -82,9 +82,11 @@ public class MergeManagerImpl<K, V> implements MergeManager<K, V> {
   private final LocalDirAllocator localDirAllocator;
   
   protected MapOutputFile mapOutputFile;
-  
+
+  //liping inMemoryMergedMapOutputs 这个里面装的是在内存中执行merge的结果。
   Set<InMemoryMapOutput<K, V>> inMemoryMergedMapOutputs = 
     new TreeSet<InMemoryMapOutput<K,V>>(new MapOutputComparator<K, V>());
+  //Intermediate 内存到内存的merge
   private IntermediateMemoryToMemoryMerger memToMemMerger;
 
   Set<InMemoryMapOutput<K, V>> inMemoryMapOutputs = 
@@ -259,10 +261,15 @@ public class MergeManagerImpl<K, V> implements MergeManager<K, V> {
   }
 
   /**
-   * 本方法返回只有两种：
-   *                拷贝到内存中的InMemoryMapOutput
-   *                拷贝到磁盘上的OnDiskMapOutput
-   *  当目标确定后，开始远程拷贝
+   *  lipng: 这个类是决定了mapOutput的输出位置，有三个选择。
+   *         当我们给reduce 较大内存时：它会调用memoryMerge，当我们给reduce 内存较多时：它会调用onDiskMerge  缓冲区大小是64kb
+   *  ①：requestedSize(uncompressedLength) > maxSingleShuffleLimit(memoryLimit * 0.25) ，如果在内存中不能放得下这个Map的数据的话，
+   *  直接把Map数据写到磁盘上，在本地目录创建一个文件,返回 OnDiskMapOutput,  缓冲区大小是64kb
+   *  ②：usedMemory > memoryLimit，当内存超过限制，则停止shuffle
+   *  ③：InMemoryMapOutput   如果内存中能放得下这次数据的话就直接把数据写到内存中。Reduce要向每个Map去拖取数据，在内存中每个Map对应一块数据，
+   *    当内存中存储的Map数据占用空间达到一定程度的时候，开始启动内存中merge，把内存中的数据merge输出到磁盘上一个文件中。
+   *
+   *    有些Map的数据较小是可以放在内存中的，有些Map的数据较大需要放在磁盘上，这样最后Reduce任务拖过来的数据有些放在内存中了有些放在磁盘上，最后会对这些来一个全局合并。
    */
   @Override
   public synchronized MapOutput<K,V> reserve(TaskAttemptID mapId, 
@@ -292,7 +299,7 @@ public class MergeManagerImpl<K, V> implements MergeManager<K, V> {
     // (usedMemory + requestedSize > memoryLimit). When this thread is done
     // fetching, this will automatically trigger a merge thereby unlocking
     // all the stalled threads
-    
+
     if (usedMemory > memoryLimit) {
       LOG.debug(mapId + ": Stalling shuffle since usedMemory (" + usedMemory
           + ") is greater than memoryLimit (" + memoryLimit + ")." + 
@@ -322,6 +329,13 @@ public class MergeManagerImpl<K, V> implements MergeManager<K, V> {
     usedMemory -= size;
   }
 
+  /**
+   *  liping: org.apache.hadoop.mapreduce.task.reduce.ShuffleSchedulerImpl#copySucceeded() 的一个实现。
+   *          及inmemory 的合并。
+   *
+   *
+   *
+   */
   public synchronized void closeInMemoryFile(InMemoryMapOutput<K,V> mapOutput) { 
     inMemoryMapOutputs.add(mapOutput);
     LOG.info("closeInMemoryFile -> map-output of size: " + mapOutput.getSize()
@@ -363,7 +377,8 @@ public class MergeManagerImpl<K, V> implements MergeManager<K, V> {
       onDiskMerger.startMerge(onDiskMapOutputs);
     }
   }
-  
+
+  //liping  这一步是执行最终的merge。
   @Override
   public RawKeyValueIterator close() throws Throwable {
     // Wait for on-going merges to complete
@@ -382,7 +397,8 @@ public class MergeManagerImpl<K, V> implements MergeManager<K, V> {
     onDiskMapOutputs.clear();
     return finalMerge(jobConf, rfs, memory, disk);
   }
-   
+
+  //liping  Thread to do in-memory merge of in-memory,shuffled map-outputs.
   private class IntermediateMemoryToMemoryMerger 
   extends MergeThread<InMemoryMapOutput<K, V>, K, V> {
     

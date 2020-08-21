@@ -604,6 +604,7 @@ abstract public class Task implements Writable, Configurable {
       committer = conf.getOutputCommitter();
     }
     Path outputPath = FileOutputFormat.getOutputPath(conf);
+    //设置输出路径
     if (outputPath != null) {
       if ((committer instanceof FileOutputCommitter)) {
         FileOutputFormat.setWorkOutputPath(conf, 

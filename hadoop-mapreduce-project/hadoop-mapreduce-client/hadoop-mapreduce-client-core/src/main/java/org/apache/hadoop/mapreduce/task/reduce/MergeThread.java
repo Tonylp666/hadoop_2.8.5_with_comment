@@ -33,6 +33,7 @@ abstract class MergeThread<T,K,V> extends Thread {
   private static final Log LOG = LogFactory.getLog(MergeThread.class);
 
   private AtomicInteger numPending = new AtomicInteger(0);
+  //liping  待合并队列，里面装的是merge线程。
   private LinkedList<List<T>> pendingToBeMerged;
   protected final MergeManagerImpl<K,V> manager;
   private final ExceptionReporter reporter;
@@ -52,6 +53,7 @@ abstract class MergeThread<T,K,V> extends Thread {
     waitForMerge();
     interrupt();
   }
+
 
   public void startMerge(Set<T> inputs) {
     if (!closed) {
@@ -90,7 +92,6 @@ abstract class MergeThread<T,K,V> extends Thread {
           inputs = pendingToBeMerged.removeFirst();
         }
 
-        // Merge
         merge(inputs);
       } catch (InterruptedException ie) {
         numPending.set(0);
@@ -108,5 +109,11 @@ abstract class MergeThread<T,K,V> extends Thread {
     }
   }
 
+  /**
+   * liping   Merge 有三个实现方法：
+   *          org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl.InMemoryMerger#merge(java.util.List)
+   *          org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl.IntermediateMemoryToMemoryMerger#merge(java.util.List)
+   *          org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl.OnDiskMerger#merge(java.util.List)
+   */
   public abstract void merge(List<T> inputs) throws IOException;
 }

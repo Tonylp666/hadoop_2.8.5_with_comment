@@ -1005,7 +1005,7 @@ public class MapTask extends Task {
             QuickSort.class, IndexedSorter.class), job);
       // buffers and accounting
       int maxMemUsage = sortmb << 20;//将MB转为字节。
-      maxMemUsage -= maxMemUsage % METASIZE;//为了将maxMemUsage 设为16的倍数？
+      maxMemUsage -= maxMemUsage % METASIZE;//为了将maxMemUsage 设为16的倍数
       kvbuffer = new byte[maxMemUsage];//100MB的一个缓冲区
       bufvoid = kvbuffer.length;
 
@@ -1137,6 +1137,7 @@ public class MapTask extends Task {
                     softLimit - bUsed) - METASIZE;
                 continue;
               } else if (bufsoftlimit && kvindex != kvend) {
+                //开始spill
                 // spill records, if any collected; check latter, as it may
                 // be possible for metadata alignment to hit spill pcnt
                 startSpill();
@@ -1356,14 +1357,17 @@ public class MapTask extends Task {
         bufvoid = bufmark;
         final int kvbidx = 4 * kvindex;
         final int kvbend = 4 * kvend;
-        final int avail =
+        final int avail =//从头部到meta数据空间
           Math.min(distanceTo(0, kvbidx), distanceTo(0, kvbend));
         if (bufindex + headbytelen < avail) {
+          //如果头部开始的剩余空间足够放下整个key，原来在头部的那部分key拷贝到headbytelen开始的地方，
+          // 原来在尾部的那部分拷贝到从0开始的地方
           System.arraycopy(kvbuffer, 0, kvbuffer, headbytelen, bufindex);
           System.arraycopy(kvbuffer, bufvoid, kvbuffer, 0, headbytelen);
           bufindex += headbytelen;
           bufferRemaining -= kvbuffer.length - bufvoid;
         } else {
+          //如果头部剩余空间不足，暂存头部那部分key
           byte[] keytmp = new byte[bufindex];
           System.arraycopy(kvbuffer, 0, keytmp, 0, bufindex);
           bufindex = 0;
@@ -1631,11 +1635,12 @@ public class MapTask extends Task {
           (kvstart >= kvend
           ? kvstart
           : kvmeta.capacity() + kvstart) / NMETA;
-        //使用快排对缓冲区kvbuffer中中的[mstart, mend]进行排序，先按分区进行判读，再按key排序。
+        //使用快排对缓冲区kvbuffer中中的[mstart, mend]进行排序,先按分区进行判读，再按key排序。
         sorter.sort(MapOutputBuffer.this, mstart, mend, reporter);
         int spindex = mstart;
         final IndexRecord rec = new IndexRecord();
         final InMemValBytes value = new InMemValBytes();
+        //循环遍历各个partition
         for (int i = 0; i < partitions; ++i) {
           //构建一个IFile.Writer 对象将输出流传进去，输出到指定的文件。支持行级压缩
           IFile.Writer<K, V> writer = null;
@@ -1698,6 +1703,7 @@ public class MapTask extends Task {
                   * MAP_OUTPUT_INDEX_RECORD_LENGTH);
           spillRec.writeToFile(indexFilename, job);
         } else {
+          //加入缓存
           indexCacheList.add(spillRec);
           totalIndexCacheMemory +=
             spillRec.size() * MAP_OUTPUT_INDEX_RECORD_LENGTH;

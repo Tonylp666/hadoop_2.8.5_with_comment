@@ -194,6 +194,7 @@ public class ShuffleSchedulerImpl<K,V> implements ShuffleScheduler<K,V> {
     int mapIndex = mapId.getTaskID().getId();
 
     if (!finishedMaps[mapIndex]) {
+      //更新状态，出发merge操作。。。
       output.commit();
       finishedMaps[mapIndex] = true;
       shuffledMapsCounter.increment(1);
@@ -246,6 +247,10 @@ public class ShuffleSchedulerImpl<K,V> implements ShuffleScheduler<K,V> {
     updateStatus(null);
   }
 
+  /**
+   *   liping：
+   *   hostFailures = new HashMap<String,IntWritable>();（主机名，失败次数）
+   */
   public synchronized void hostFailed(String hostname) {
     if (hostFailures.containsKey(hostname)) {
       IntWritable x = hostFailures.get(hostname);
@@ -255,6 +260,12 @@ public class ShuffleSchedulerImpl<K,V> implements ShuffleScheduler<K,V> {
     }
   }
 
+  /**
+   *  failureCounts   Map<TaskAttemptID,IntWritable>
+   *      将失败任务加到 failureCounts 集合
+   *
+   *
+   */
   public synchronized void copyFailed(TaskAttemptID mapId, MapHost host,
       boolean readError, boolean connectExcpt) {
     host.penalize();
@@ -286,6 +297,7 @@ public class ShuffleSchedulerImpl<K,V> implements ShuffleScheduler<K,V> {
       }
     }
 
+    //将错误信息报告给MRAppMaster
     checkAndInformMRAppMaster(failures, mapId, readError, connectExcpt,
         hostFail);
 

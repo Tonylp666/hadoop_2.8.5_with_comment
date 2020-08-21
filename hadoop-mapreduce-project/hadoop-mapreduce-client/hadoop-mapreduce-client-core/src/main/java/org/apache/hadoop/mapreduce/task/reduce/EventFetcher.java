@@ -63,6 +63,7 @@ class EventFetcher<K,V> extends Thread {
     try {
       while (!stopped && !Thread.currentThread().isInterrupted()) {
         try {
+          //liping  获取map完成的事件数
           int numNewMaps = getMapCompletionEvents();
           failures = 0;
           if (numNewMaps > 0) {
@@ -114,6 +115,7 @@ class EventFetcher<K,V> extends Thread {
       throws IOException, InterruptedException {
     
     int numNewMaps = 0;
+    //liping: events 里面存了所有已经完成的maptask
     TaskCompletionEvent events[] = null;
 
     do {

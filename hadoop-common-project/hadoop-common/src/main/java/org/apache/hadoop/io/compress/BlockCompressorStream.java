@@ -101,7 +101,7 @@ public class BlockCompressorStream extends CompressorStream {
     /**
      * len + limlen > MAX_INPUT_SIZE && limlen > 0
      * 调用finish(),此时如果compressor没有结束，则将 limlen 写入压缩输出流中，
-     * 然后停止往compressor中灌数据，然后产看compressor 是否结束，
+     * 然后停止往compressor中灌数据，然后查看compressor 是否结束，
      * 若没有结束则调用compress(),在压缩结束时充值压缩器。
      *
      *

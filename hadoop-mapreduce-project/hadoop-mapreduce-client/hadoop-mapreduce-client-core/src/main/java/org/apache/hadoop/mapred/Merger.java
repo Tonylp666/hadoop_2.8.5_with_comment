@@ -301,8 +301,10 @@ public class Merger {
       if (reader == null) {
         FSDataInputStream in = fs.open(file);
 
+        //定位到指定的offset，下一次read()就从该指定位置开始。
         in.seek(segmentOffset);
         in = CryptoUtils.wrapIfNecessary(conf, in);
+
         reader = new Reader<K, V>(conf, in,
             segmentLength - CryptoUtils.cryptoPadding(conf),
             codec, readsCounter);
@@ -333,11 +335,13 @@ public class Merger {
       return (rawDataLength > 0) ? rawDataLength : getLength();
     }
 
+
     boolean nextRawKey() throws IOException {
       return reader.nextRawKey(key);
     }
 
     void nextRawValue(DataInputBuffer value) throws IOException {
+      //liping  获取下一条记录
       reader.nextRawValue(value);
     }
 
@@ -413,6 +417,9 @@ public class Merger {
      * map task before calling merge() so that final merge of map task
      * is also considered as part of sort phase.
      */
+    /**
+     * liping includeFinalMerge 这个决定最后一个merge是否参与排序。在map阶段为true，在reduce阶段为false。
+     */
     private void considerFinalMergeForProgress() {
       includeFinalMerge = true;
     }    
@@ -438,7 +445,8 @@ public class Merger {
       this(conf, fs, inputs, deleteInputs, codec, comparator, reporter, null,
           TaskType.REDUCE);
     }
-    
+
+    //在初始化过程中，会将所有的inpus放到一个ArrayList，然后对其进行排序 。
     public MergeQueue(Configuration conf, FileSystem fs, 
                       Path[] inputs, boolean deleteInputs, 
                       CompressionCodec codec, RawComparator<K> comparator,
@@ -463,8 +471,7 @@ public class Merger {
                                            Task.MERGED_OUTPUT_PREFIX) ? 
                                         null : mergedMapOutputsCounter)));
       }
-      
-      // Sort segments on file-lengths
+      // Sort segments on file-lengths  根据文件长度对segment进行排序
       Collections.sort(segments, segmentComparator); 
     }
     

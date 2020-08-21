@@ -31,6 +31,8 @@ import org.apache.hadoop.io.WritableUtils;
  * Shuffle Header information that is sent by the TaskTracker and 
  * deciphered by the Fetcher thread of Reduce task
  *
+ * liping: <mapId,compressedLength,uncompressedLength,forReduce>
+ *
  */
 @InterfaceAudience.Private
 @InterfaceStability.Stable

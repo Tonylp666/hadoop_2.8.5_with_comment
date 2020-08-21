@@ -74,13 +74,15 @@ public class Shuffle<K, V> implements ShuffleConsumerPlugin<K, V>, ExceptionRepo
     this.taskStatus = context.getStatus();
     this.reduceTask = context.getReduceTask();
     this.localMapFiles = context.getLocalMapFiles();
-    
+    //设置失败次数，最大等待时间
     scheduler = new ShuffleSchedulerImpl<K, V>(jobConf, taskStatus, reduceId,
         this, copyPhase, context.getShuffledMapsCounter(),
         context.getReduceShuffleBytes(), context.getFailedShuffleCounter());
+    //初始化归并排序相关服务，实例化一个MergeManagerImpl对象，准备好merge相关的服务。
     merger = createMergeManager(context);
   }
 
+  //liping  这里进行merge
   protected MergeManager<K, V> createMergeManager(
       ShuffleConsumerPlugin.Context context) {
     return new MergeManagerImpl<K, V>(reduceId, jobConf, context.getLocalFS(),
@@ -106,6 +108,7 @@ public class Shuffle<K, V> implements ShuffleConsumerPlugin<K, V>, ExceptionRepo
     final EventFetcher<K,V> eventFetcher = 
       new EventFetcher<K,V>(reduceId, umbilical, scheduler, this,
           maxEventsToFetch);
+    //liping  监听map任务的执行，获取map的完成状态，获得已经完成的map输出相关信息。
     eventFetcher.start();
     
     // Start the map-output fetcher threads
@@ -153,6 +156,7 @@ public class Shuffle<K, V> implements ShuffleConsumerPlugin<K, V>, ExceptionRepo
     scheduler.close();
 
     copyPhase.complete(); // copy is already complete
+
     taskStatus.setPhase(TaskStatus.Phase.SORT);
     reduceTask.statusUpdate(umbilical);
 

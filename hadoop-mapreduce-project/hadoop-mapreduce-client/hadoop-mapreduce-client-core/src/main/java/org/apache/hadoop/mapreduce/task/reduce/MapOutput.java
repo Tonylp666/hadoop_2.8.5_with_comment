@@ -78,6 +78,11 @@ public abstract class MapOutput<K, V> {
                                ShuffleClientMetrics metrics,
                                Reporter reporter) throws IOException;
 
+  /**
+   *  liping  : 这个方法会完成 copy、merge、sort。
+   *            这个方法有两个实现：org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl#closeInMemoryFile()
+   *                            org.apache.hadoop.mapreduce.task.reduce.MergeManagerImpl#closeOnDiskFile()
+   */
   public abstract void commit() throws IOException;
   
   public abstract void abort();

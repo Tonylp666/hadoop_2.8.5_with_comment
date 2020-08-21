@@ -320,10 +320,11 @@ public class ReduceTask extends Task {
     job.setBoolean(JobContext.SKIP_RECORDS, isSkipping());
 
 
+    //设置阶段
     if (isMapOrReduce()) {
-      copyPhase = getProgress().addPhase("copy");
-      sortPhase  = getProgress().addPhase("sort");
-      reducePhase = getProgress().addPhase("reduce");
+      copyPhase = getProgress().addPhase("copy");//copy -----> shuffle
+      sortPhase  = getProgress().addPhase("sort");//sort/merge  与shuffle同时执行
+      reducePhase = getProgress().addPhase("reduce");//reduce阶段 处理数据
     }
     // start thread that will handle communication with parent
     TaskReporter reporter = startReporter(umbilical);
@@ -350,6 +351,7 @@ public class ReduceTask extends Task {
     
     // Initialize the codec
     codec = initCodec();
+    //key value 迭代器，很明显，这里开始抓取map端输出数据。
     RawKeyValueIterator rIter = null;
     ShuffleConsumerPlugin shuffleConsumerPlugin = null;
     
@@ -376,17 +378,18 @@ public class ReduceTask extends Task {
                   taskStatus, copyPhase, sortPhase, this,
                   mapOutputFile, localMapFiles);
     shuffleConsumerPlugin.init(shuffleContext);
-
+    // rIter = shuffleConsumerPlugin.run(); 我们可以看到，欲知数据具体是如何抓取的，需要到 shuffleConsumerPlugin 。
     rIter = shuffleConsumerPlugin.run();
 
     // free up the data structures
     mapOutputFilesOnDisk.clear();
     
     sortPhase.complete();                         // sort is complete
-    setPhase(TaskStatus.Phase.REDUCE); 
+    setPhase(TaskStatus.Phase.REDUCE); //开始执行reduce
     statusUpdate(umbilical);
     Class keyClass = job.getMapOutputKeyClass();
     Class valueClass = job.getMapOutputValueClass();
+    //不存在排序比较器，则会选择key所属类型的类型比较器去作为分组比较器使用
     RawComparator comparator = job.getOutputValueGroupingComparator();
 
     if (useNewApi) {
